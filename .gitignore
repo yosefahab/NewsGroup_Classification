@@ -2,7 +2,6 @@ src/__pycache__
 .vscode
 Data/*
 Backup/*
-
 # General
 .DS_Store
 .AppleDouble
