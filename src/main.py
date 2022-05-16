@@ -1,7 +1,7 @@
 # Each project will include 4 main requirements:
-# 1. Data preprocessing                                 -> preprocessing.py // Abdelrahman Omar, Badr
-# 2. Features extraction.                               -> feature_extraction.py // Seif, 
-# 3. Model training and testing                         -> main.py // all
+# 1. Data preprocessing                                 -> preprocessing.py // Abdelrahman Omar, Yousef
+# 2. Features extraction.                               -> feature_extraction.py // Seif, Soliman
+# 3. Model training and testing                         -> main.py // all ()
 # 4. Results visualization.                             -> visualization.py //
 # Attention!: Highest project accuracy will be rewarded
 
@@ -18,7 +18,7 @@ import shutil
 import random 
 
 # global data # contains main data
-global x_train, y_train
+global train, y_train
 global x_test, y_test 
 
 Paths = {
@@ -28,7 +28,14 @@ Paths = {
 }
 # read data using given path
 def load_train():
-    pass 
+    train = pd.DataFrame(columns=["Label", "Article"])
+    dirs = os.listdir(Paths["data_train"])
+    for dir in dirs:
+        for file in os.listdir(os.path.join(Paths["data_train"], dir)):
+            with open(os.path.join(Paths["data_train"], dir, file)) as f:
+                row = pd.DataFrame([{"Label": dir, "Article": f.read()}])
+                train = pd.concat([train, row])
+    train.to_csv('../Data/train.csv', index=False)
 
 def split_data():
     def splitArticles(label):
@@ -63,7 +70,7 @@ def split_data():
         splitArticles(label)
 
 def main():
-    split_data()
+    #split_data()
     load_train()
 
 if __name__ == "__main__":
