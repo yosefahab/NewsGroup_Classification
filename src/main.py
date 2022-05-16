@@ -70,7 +70,7 @@ def split_data():
         splitArticles(label)
 
 def main():
-    #split_data()
+    split_data()
     load_train()
 
 if __name__ == "__main__":
