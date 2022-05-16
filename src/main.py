@@ -11,9 +11,13 @@
 # import model1.py
 # import model2.py
 
+from pathlib import Path
 import pandas as pd
+import os
+import shutil
+import random 
 
-global data # contains main data
+# global data # contains main data
 global x_train, y_train
 global x_test, y_test 
 
@@ -23,12 +27,44 @@ Paths = {
     "data_test": r"../Data/test",   # contains subdirectories!
 }
 # read data using given path
-def read_data(path):
-    data = pd.read_csv(path,sep='\s+').astype(int)
-    return data
+def load_train():
+    pass 
+
+def split_data():
+    def splitArticles(label):
+        articles = os.listdir(os.path.join(Paths["data"],label))
+        random.shuffle(articles)
+        articlesTest = articles[:int(len(articles)*0.3)]
+        articlesTrain = articles[int(len(articles)*0.3):]
+       
+        # copy 70% of articles to Data/train
+        for i in range(len(articlesTrain)):
+            src = os.path.join(Paths["data"],label,articlesTrain[i])
+            dest = os.path.join(Paths["data_train"],label)
+            if not os.path.isdir(dest):
+                os.makedirs(dest)
+            shutil.copy2(src,dest)
+        # copy 30% of articles to Data/test
+        for i in range(len(articlesTest)):
+            src = os.path.join(Paths["data"],label,articlesTrain[i])
+            dest = os.path.join(Paths["data_test"],label)
+            if not os.path.isdir(dest):
+                os.makedirs(dest)
+            shutil.copy2(src,dest)
+
+    if not os.path.isdir(Paths["data_train"]):
+        os.makedirs(Paths["data_train"])
+    
+    if not os.path.isdir(Paths["data_test"]):
+        os.makedirs(Paths["data_test"])
+
+    labels = os.listdir(Paths["data"])
+    for label in labels:
+        splitArticles(label)
 
 def main():
-    pass
+    split_data()
+    load_train()
 
 if __name__ == "__main__":
     main()
