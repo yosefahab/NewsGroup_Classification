@@ -5,17 +5,16 @@
 # 4. Results visualization.                             -> visualization.py //
 # Attention!: Highest project accuracy will be rewarded
 
-# import preprocessing.py
+from preprocessing import preprocess
 # import feature_extraction.py
 # import visualization.py
 # import model1.py
 # import model2.py
 
-from pathlib import Path
 import pandas as pd
 import os
 import shutil
-import random 
+import random
 
 # global data # contains main data
 global train, y_train
@@ -70,8 +69,17 @@ def split_data():
         splitArticles(label)
 
 def main():
-    split_data()
-    load_train()
+    # split_data()
+    # load_train()
+
+    # pd.options.display.max_colwidth = 150  # set a value as your need
+    dataframe = pd.read_csv("../Data/train.csv")
+    with open ("before.txt",'w') as f:
+        f.write(dataframe['Article'].iloc[0])
+    preprocess(dataframe)
+
+    with open ("after.txt",'w') as f:
+        f.write(dataframe['Article'].iloc[0])
 
 if __name__ == "__main__":
     main()
