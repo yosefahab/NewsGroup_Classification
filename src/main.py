@@ -74,8 +74,11 @@ def main():
 
     # pd.options.display.max_colwidth = 150  # set a value as your need
     dataframe = pd.read_csv("../Data/train.csv")
+    dataframe = dataframe.sample(frac=1).reset_index()
+    # dataframe = dataframe.sample(frac=1, random_state=45).reset_index()
     with open ("before.txt",'w') as f:
         f.write(dataframe['Article'].iloc[0])
+
     preprocess(dataframe)
 
     with open ("after.txt",'w') as f:
