@@ -1,88 +1,80 @@
 # Each project will include 4 main requirements:
-# 1. Data preprocessing                                 -> preprocessing.py // Abdelrahman Omar, Yousef
-# 2. Features extraction.                               -> feature_extraction.py // Seif, Soliman
-# 3. Model training and testing                         -> main.py // all ()
-# 4. Results visualization.                             -> visualization.py //
+# 1. Data preprocessing                                 -> preprocessing.py
+# 2. Features extraction.                               -> feature_extraction.py
+# 3. Model training and testing                         -> main.py 
+# 4. Results visualization.                             -> visualization.py 
 # Attention!: Highest project accuracy will be rewarded
 
+from pathlib import Path
+from feature_extraction import extract_features, get_missing_cols, get_encoding
 from preprocessing import preprocess
-# import feature_extraction.py
-# import visualization.py
-# import model1.py
-# import model2.py
+from sklearn import preprocessing
+# from model1 import linear
+# from model2 import naive, naive_bayes
+from sklearn.metrics import accuracy_score
+
+
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import CountVectorizer,TfidfVectorizer
+from sklearn import model_selection, preprocessing, linear_model, naive_bayes, metrics
 
 import pandas as pd
 import os
-import shutil
-import random
-
-# global data # contains main data
-global train, y_train
-global x_test, y_test 
 
 Paths = {
     "data": r"../Data/20news-18828",# contains subdirectories!
     "data_train": r"../Data/train", # contains subdirectories!
     "data_test": r"../Data/test",   # contains subdirectories!
 }
-# read data using given path
-def load_train():
-    train = pd.DataFrame(columns=["Label", "Article"])
-    dirs = os.listdir(Paths["data_train"])
+
+def load_data(path):
+    data = pd.DataFrame(columns=["Label", "Article"])
+    dirs = os.listdir(path)
     for dir in dirs:
-        for file in os.listdir(os.path.join(Paths["data_train"], dir)):
-            with open(os.path.join(Paths["data_train"], dir, file)) as f:
+        for file in os.listdir(os.path.join(path, dir)):
+            with open(os.path.join(path, dir, file)) as f:
                 row = pd.DataFrame([{"Label": dir, "Article": f.read()}])
-                train = pd.concat([train, row])
-    train.to_csv('../Data/train.csv', index=False)
+                data = pd.concat([data, row])
+    return data
 
-def split_data():
-    def splitArticles(label):
-        articles = os.listdir(os.path.join(Paths["data"],label))
-        random.shuffle(articles)
-        articlesTest = articles[:int(len(articles)*0.3)]
-        articlesTrain = articles[int(len(articles)*0.3):]
-       
-        # copy 70% of articles to Data/train
-        for i in range(len(articlesTrain)):
-            src = os.path.join(Paths["data"],label,articlesTrain[i])
-            dest = os.path.join(Paths["data_train"],label)
-            if not os.path.isdir(dest):
-                os.makedirs(dest)
-            shutil.copy2(src,dest)
-        # copy 30% of articles to Data/test
-        for i in range(len(articlesTest)):
-            src = os.path.join(Paths["data"],label,articlesTrain[i])
-            dest = os.path.join(Paths["data_test"],label)
-            if not os.path.isdir(dest):
-                os.makedirs(dest)
-            shutil.copy2(src,dest)
+def read_data(path):
+    dataframe = load_data(path)
+    dataframe = dataframe.sample(frac=1, random_state=45).reset_index()
 
-    if not os.path.isdir(Paths["data_train"]):
-        os.makedirs(Paths["data_train"])
-    
-    if not os.path.isdir(Paths["data_test"]):
-        os.makedirs(Paths["data_test"])
+    return dataframe
 
-    labels = os.listdir(Paths["data"])
-    for label in labels:
-        splitArticles(label)
+def train_model(classifier, feature_vector_train, label, feature_vector_valid, valid_y):
+    # fit the training dataset on the classifier
+    classifier.fit(feature_vector_train, label)
+    # predict the labels on validation dataset
+    predictions = classifier.predict(feature_vector_valid)
+    return metrics.accuracy_score(predictions, valid_y)
 
 def main():
-    # split_data()
-    # load_train()
+    # df = read_data(Paths["data"])
+    df = pd.read_csv("../Data/data.csv")
+    df = df.sample(frac=1, random_state=1).reset_index()
 
-    # pd.options.display.max_colwidth = 150  # set a value as your need
-    dataframe = pd.read_csv("../Data/train.csv")
-    dataframe = dataframe.sample(frac=1).reset_index()
-    # dataframe = dataframe.sample(frac=1, random_state=45).reset_index()
-    with open ("before.txt",'w') as f:
-        f.write(dataframe['Article'].iloc[0])
+    # df.to_csv("../Data/data.csv",index=False)
 
-    preprocess(dataframe)
+    preprocess(df)
+    
+    train_x, valid_x, ytrain, ytest = model_selection.train_test_split(df['Article'], df['Label'])
 
-    with open ("after.txt",'w') as f:
-        f.write(dataframe['Article'].iloc[0])
+    encoder = preprocessing.LabelEncoder()
+    ytrain = encoder.fit_transform(ytrain)
+    ytest = encoder.fit_transform(ytest)
+
+    tfidf_vect = TfidfVectorizer(analyzer='word', token_pattern=r'\w+')
+    tfidf_vect.fit(df['Article'])
+    xtrain =  tfidf_vect.transform(train_x)
+    xtest =  tfidf_vect.transform(valid_x)
+    
+    accuracy = train_model(naive_bayes.MultinomialNB(alpha=1e-10), xtrain, ytrain, xtest, ytest)
+    print ("Accuracy: ", accuracy)
+    accuracy = train_model(linear_model.LogisticRegression(max_iter=1000), xtrain, ytrain, xtest,ytest)
+    print ("Accuracy: ", accuracy)
+
 
 if __name__ == "__main__":
     main()

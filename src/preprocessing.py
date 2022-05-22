@@ -23,19 +23,18 @@ def preprocess(dataframe):
   
     # preprocesing
     remove_stopWords(dataframe)
+    # lemmatize(dataframe)
 
     # Stemmer(dataframe, PorterStemmer())
     # Stemmer(dataframe, LancasterStemmer())
     Stemmer(dataframe, SnowballStemmer("english"))
 
-    # lemmatize(dataframe)
-
-    
 def lowercase(dataframe):
     dataframe['Article'] = dataframe['Article'].apply(lambda x: " ".join(x.lower() for x in x.split()))
 
 def replace_email(dataframe):
     regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+    # dataframe['Article'] = dataframe['Article'].apply(lambda x: (re.sub(regex, " ", x)))
     dataframe['Article'] = dataframe['Article'].apply(lambda x: (re.sub(regex, "emailadd", x)))
 
 def remove_symbols(dataframe):
@@ -46,10 +45,10 @@ def remove_symbols(dataframe):
 
 def replace_numbers(dataframe):
     regex = r'\d+[\.\-\d]*'
-    dataframe['Article'] = dataframe['Article'].apply(lambda x: re.sub(regex,"number",x))
+    dataframe['Article'] = dataframe['Article'].apply(lambda x: re.sub(regex,"numb",x))
 
 def remove_stopWords(dataframe):
-    nltk.download('stopwords')
+    # nltk.download('stopwords')
     stop = stopwords.words('english')
     dataframe['Article'] = dataframe['Article'].apply(lambda x: " ".join(x for x in x.split() if x not in stop))
 
@@ -60,6 +59,6 @@ def lemmatize(dataframe):
     dataframe['Article'] = dataframe['Article'].apply(lambda x: " ".join([Word(word).lemmatize() for word in x.split()]))
 
 def remove_gibberish(dataframe):
-    nltk.download('words')
+    # nltk.download('words')
     words = set(nltk.corpus.words.words())
     dataframe['Article'] = dataframe['Article'].apply(lambda x: " ".join(w for w in nltk.wordpunct_tokenize(x) if w in words or not w.isalpha()))
